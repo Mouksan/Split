@@ -1,0 +1,145 @@
+/* Swipeweaver — окно сравнения свайпов. Цвета берутся из темы таверны. */
+
+/* Ширина попапа сравнения. Трогаем только наш попап, остальные не задеваем. */
+dialog.popup.wide_dialogue_popup:has(.swv-window) {
+    width: 75vw;
+    max-width: 75vw;
+}
+
+.swv-window {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 100%;
+    text-align: left;
+}
+
+.swv-title {
+    margin: 0;
+    text-align: center;
+}
+
+.swv-columns {
+    display: flex;
+    gap: 12px;
+    height: 70vh;
+    min-height: 0;
+}
+
+.swv-column {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.swv-column-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.swv-select {
+    flex: 1 1 auto;
+    width: 100%;
+    margin: 0;
+}
+
+/* Точка «есть несохранённые правки». Место под неё держим всегда, чтобы шапка не прыгала. */
+.swv-dirty {
+    flex: 0 0 auto;
+    width: 1em;
+    text-align: center;
+    font-size: 1.4em;
+    line-height: 1;
+    visibility: hidden;
+}
+
+.swv-dirty.swv-visible {
+    visibility: visible;
+}
+
+.swv-text {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    max-height: none;
+    margin: 0;
+    resize: none;
+    text-align: left;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.swv-column-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.swv-column-footer .swv-btn {
+    margin: 0;
+}
+
+.swv-divider {
+    flex: 0 0 1px;
+    background-color: var(--SmartThemeBorderColor);
+}
+
+/* Узкий экран: колонки друг под другом, попап почти во всю ширину. */
+@media (max-width: 700px) {
+    dialog.popup.wide_dialogue_popup:has(.swv-window) {
+        width: 96vw;
+        max-width: 96vw;
+    }
+
+    .swv-columns {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .swv-text {
+        flex: none;
+        height: 30vh;
+    }
+
+    .swv-divider {
+        flex-basis: 1px;
+        width: 100%;
+        height: 1px;
+    }
+}
+
+/* Подсказка под колонками; во время генерации — предупреждение. */
+.swv-hint {
+    text-align: center;
+    font-size: 0.85em;
+    opacity: 0.6;
+}
+
+.swv-hint.swv-hint-locked {
+    opacity: 1;
+    font-weight: bold;
+}
+
+.swv-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Моноширинный шрифт в полях — включается в настройках. */
+.swv-text.swv-mono {
+    font-family: var(--monoFontFamily, ui-monospace, Consolas, monospace);
+}
+
+/* Панель настроек. */
+.swv-settings .inline-drawer-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.swv-settings select {
+    margin: 0;
+}

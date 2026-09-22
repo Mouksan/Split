@@ -1,0 +1,11 @@
+{
+    "display_name": "Swipeweaver",
+    "loading_order": 100,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "Mouksan",
+    "version": "1.0.0",
+    "homePage": "https://github.com/Mouksan/swipeweaver"
+}
