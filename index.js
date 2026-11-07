@@ -1,8 +1,10 @@
-// Swipeweaver — сравнение двух свайпов одного сообщения.
-// Версия 1.0: окно сравнения, правка и сохранение, настройки шрифта.
+// Split (бывший Swipeweaver) — сравнение двух свайпов одного сообщения.
+// 1.0: окно сравнения, правка и сохранение, настройки шрифта.
+// 1.1: просмотр свайпа как в чате (картинки и разметка), имя Split.
+// Ключ настроек swipeweaver, префикс swv- и /swipecompare не меняются.
 
 const MODULE_NAME = 'swipeweaver';
-const LOG_PREFIX = '[Swipeweaver]';
+const LOG_PREFIX = '[Split]';
 const COMMAND_NAME = 'swipecompare';
 
 const BUTTON_CLASS = 'swv-open-btn';
@@ -32,6 +34,8 @@ const TEXTS = Object.freeze({
     toastNoCharMessages: 'В этом чате нет сообщений персонажа',
     toastDirty: 'В этой колонке остались несохранённые правки',
     toastSameSwipe: 'Выбран один и тот же свайп',
+    previewOn: 'Просмотр — как в чате',
+    previewOff: 'Вернуться к тексту',
     toastForceClosed: 'Окно сравнения закрыто: сообщение или чат сменились',
     settingsFontSize: 'Размер шрифта в окне сравнения',
     settingsFontSizeInherit: 'Как в чате',
@@ -221,7 +225,15 @@ function buildColumn(doc, side, mesId, initialCount, hooks) {
     dot.className = 'swv-dirty';
     dot.textContent = '•';
 
-    header.append(select, dot);
+    // Глаз: «Просмотр» отрисовывает свайп как сообщение в чате, «Текст» — правка.
+    const previewButton = doc.createElement('button');
+    previewButton.type = 'button';
+    previewButton.className = 'swv-preview-toggle menu_button';
+    previewButton.title = TEXTS.previewOn;
+    previewButton.setAttribute('aria-pressed', 'false');
+    previewButton.innerHTML = '<i class="fa-solid fa-eye"></i>';
+
+    header.append(select, previewButton, dot);
 
     const textarea = doc.createElement('textarea');
     textarea.className = 'swv-text text_pole';
@@ -240,7 +252,53 @@ function buildColumn(doc, side, mesId, initialCount, hooks) {
     const cancelButton = createMenuButton(doc, TEXTS.cancel);
     footer.append(saveButton, cancelButton);
 
-    column.append(header, textarea, footer);
+    const preview = doc.createElement('div');
+    preview.className = 'swv-preview mes_text';
+    preview.hidden = true;
+    if (fontSizePx > 0) {
+        preview.style.fontSize = `${fontSizePx}px`;
+    }
+
+    column.append(header, textarea, preview, footer);
+
+    let previewMode = false;
+
+    // Тем же движком, что и сообщения в чате: маркдаун, регексы отображения, картинки.
+    // Берём текст из поля — с несохранёнными правками, если они есть.
+    const renderPreview = () => {
+        const message = getCtx().chat?.[mesId];
+        let html;
+        try {
+            const format = getCtx().messageFormatting;
+            html = typeof format === 'function'
+                ? format(textarea.value, message?.name ?? '', Boolean(message?.is_system), Boolean(message?.is_user), mesId)
+                : null;
+        } catch (error) {
+            console.warn(`${LOG_PREFIX} Не смог отрисовать просмотр`, error);
+            html = null;
+        }
+        if (html === null || html === undefined) {
+            preview.textContent = textarea.value;
+            preview.classList.add('swv-preview-plain');
+        } else {
+            preview.innerHTML = html;
+            preview.classList.remove('swv-preview-plain');
+        }
+        preview.scrollTop = 0;
+    };
+
+    const setPreview = (on) => {
+        previewMode = on;
+        previewButton.setAttribute('aria-pressed', String(on));
+        previewButton.classList.toggle('swv-active', on);
+        previewButton.title = on ? TEXTS.previewOff : TEXTS.previewOn;
+        previewButton.innerHTML = on ? '<i class="fa-solid fa-pen"></i>' : '<i class="fa-solid fa-eye"></i>';
+        textarea.hidden = on;
+        preview.hidden = !on;
+        if (on) renderPreview();
+    };
+
+    previewButton.addEventListener('click', () => setPreview(!previewMode));
 
     const isDirty = () => textarea.value !== original;
 
@@ -258,6 +316,7 @@ function buildColumn(doc, side, mesId, initialCount, hooks) {
         textarea.value = original;
         textarea.scrollTop = 0;
         refreshControls();
+        if (previewMode) renderPreview();
     };
 
     /** Сохраняет колонку. Бросает ошибку, если не вышло. */
@@ -334,6 +393,7 @@ function buildColumn(doc, side, mesId, initialCount, hooks) {
         }
         textarea.value = original;
         refreshControls();
+        if (previewMode) renderPreview();
     });
 
     return {
@@ -608,16 +668,18 @@ function renderSettingsPanel() {
         <div class="swv-settings">
             <div class="inline-drawer">
                 <div class="inline-drawer-toggle inline-drawer-header">
-                    <b>Swipeweaver</b>
+                    <b><i class="fa-solid fa-table-columns"></i> 「 SPLIT 」</b>
                     <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
                 </div>
                 <div class="inline-drawer-content">
+                    <div class="swv-settings-body">
                     <label for="swv-font-size">${TEXTS.settingsFontSize}</label>
                     <select id="swv-font-size" class="text_pole">${fontOptions}</select>
                     <label class="checkbox_label" for="swv-monospace">
                         <input type="checkbox" id="swv-monospace">
                         <span>${TEXTS.settingsMonospace}</span>
                     </label>
+                    </div>
                 </div>
             </div>
         </div>`;

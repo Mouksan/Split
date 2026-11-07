@@ -1,4 +1,4 @@
-/* Swipeweaver — окно сравнения свайпов. Цвета берутся из темы таверны. */
+/* Split (бывший Swipeweaver) — окно сравнения свайпов. Цвета берутся из темы таверны. */
 
 /* Ширина попапа сравнения. Трогаем только наш попап, остальные не задеваем. */
 dialog.popup.wide_dialogue_popup:has(.swv-window) {
@@ -72,6 +72,43 @@ dialog.popup.wide_dialogue_popup:has(.swv-window) {
     line-height: 1.5;
 }
 
+/* Глаз «Просмотр / Текст» в шапке колонки. */
+.swv-preview-toggle {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 4px 8px;
+}
+
+.swv-preview-toggle.swv-active {
+    filter: brightness(1.3);
+}
+
+/* Просмотр — как сообщение в чате. */
+.swv-preview {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px 10px;
+    border: 1px solid var(--SmartThemeBorderColor);
+    border-radius: 5px;
+    text-align: left;
+    line-height: 1.5;
+}
+
+.swv-preview[hidden],
+.swv-text[hidden] {
+    display: none;
+}
+
+.swv-preview img {
+    max-width: 100%;
+    height: auto;
+}
+
+.swv-preview.swv-preview-plain {
+    white-space: pre-wrap;
+}
+
 .swv-column-footer {
     display: flex;
     justify-content: flex-end;
@@ -99,7 +136,8 @@ dialog.popup.wide_dialogue_popup:has(.swv-window) {
         height: auto;
     }
 
-    .swv-text {
+    .swv-text,
+    .swv-preview {
         flex: none;
         height: 30vh;
     }
@@ -134,7 +172,9 @@ dialog.popup.wide_dialogue_popup:has(.swv-window) {
 }
 
 /* Панель настроек. */
-.swv-settings .inline-drawer-content {
+/* Flex — на обёртке, а не на .inline-drawer-content: иначе наш display
+   перебивает таверну, и шторка не сворачивается. */
+.swv-settings .swv-settings-body {
     display: flex;
     flex-direction: column;
     gap: 6px;
